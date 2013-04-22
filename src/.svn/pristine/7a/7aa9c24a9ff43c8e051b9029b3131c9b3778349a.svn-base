@@ -1,0 +1,413 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package RobotVision;
+
+import CRFH.*;
+import Exceptions.SvmInvalidOperationException;
+import Exceptions.SvmInvalidParameterException;
+import SVM.SvmPredict;
+import SVM.SvmPrediction;
+import SVM.SvmScale;
+import SVM.SvmTrain;
+import Utils.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Map.Entry;
+import javax.imageio.ImageIO;
+import libsvm.svm_model;
+import libsvm.svm_node;
+import libsvm.svm_print_interface;
+
+/**
+ *
+ * @author Danna
+ */
+public class CRFHTest {
+
+    private CRFH mycrfh;
+    private svm_model svmModel = null;
+
+    private ArrayList<Descriptor> initializeDescriptors(int scale1, int scale2, int scale3, int scale4, int bins) {
+
+        ArrayList<Descriptor> descriptorsList = new ArrayList<Descriptor>();
+
+//        LDescriptor l = new LDescriptor(scale1, bins);
+        LxDescriptor lx1 = new LxDescriptor(scale1, bins);
+        LyDescriptor ly1 = new LyDescriptor(scale1, bins);
+        
+        LxDescriptor lx2 = new LxDescriptor(scale2, bins);
+        LyDescriptor ly2 = new LyDescriptor(scale2, bins);
+        
+        LxDescriptor lx3 = new LxDescriptor(scale3, bins);
+        LyDescriptor ly3 = new LyDescriptor(scale3, bins);
+        
+        LxDescriptor lx4 = new LxDescriptor(scale4, bins);
+        LyDescriptor ly4 = new LyDescriptor(scale4, bins);
+
+  //      LxxDescriptor lxx = new LxxDescriptor(scale1, bins);
+  //      LyyDescriptor lyy = new LyyDescriptor(scale1, bins);
+ //       LxyDescriptor lxy = new LxyDescriptor(scale1, bins);
+  //      LxxDescriptor lxx4 = new LxxDescriptor(scale2, bins);
+ //       LyyDescriptor lyy4 = new LyyDescriptor(scale2, bins);
+    //    LxyDescriptor lxy4 = new LxyDescriptor(scale2, bins);
+//        
+
+//        descriptorsList.add(l);
+        descriptorsList.add(ly1);
+        descriptorsList.add(lx1);
+        
+        descriptorsList.add(ly2);
+        descriptorsList.add(lx2);
+        
+        descriptorsList.add(ly3);
+        descriptorsList.add(lx3);
+        
+        descriptorsList.add(ly4);
+        descriptorsList.add(lx4);
+
+        return descriptorsList;
+    }
+    public static svm_print_interface print = new svm_print_interface() {
+
+        @Override
+        public void print(String string) {
+
+            System.out.print(string);
+        }
+    };
+
+    public void computeCrfhFeatures(String labelsFile, String imagesFolder, String locationsFolder) // boolean turnGreyscale)
+    {
+        ArrayList<ImageFeature> imageFeatures = new ArrayList<ImageFeature>();
+        BufferedImage img;
+
+        //load images and training annotations
+        mycrfh = new CRFH(this.initializeDescriptors(1, 2, 4, 8, 14), 4, 14);
+        long millis = System.currentTimeMillis();
+        int seconds = (int) (millis / 1000) % 60;
+        int minutes = (int) ((millis / (1000 * 60)) % 60);
+        int hours = (int) ((millis / (1000 * 60 * 60)) % 24);
+
+        System.out.println(hours + ":" + minutes + ":" + seconds + " Started CRFH feature extraction.");
+
+        DataInputStream in = null;
+        try {
+            
+            Annotations.loadAnnotations(labelsFile);
+
+            FileInputStream fstream = new FileInputStream(locationsFolder);
+            in = new DataInputStream(fstream);
+
+            final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+            String strLine;
+            while ((strLine = br.readLine()) != null) {
+
+                String concept = strLine.substring(strLine.indexOf(':') + 2);
+                String filename = strLine.subSequence(0, strLine.indexOf(':')).toString();
+
+                img = null;
+                img = ImageIO.read(new File(imagesFolder + "\\" + filename));
+                svm_node[] histogram = mycrfh.computeHistogram(img);
+                imageFeatures.add(new ImageFeature(histogram, Annotations.getAnnotation(concept)));
+
+                System.out.println("Processed image " + filename);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.out.println(ex.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println(ex.toString());
+        } finally {
+            try {
+                
+                in.close();
+                
+                Serialization.serialize(imageFeatures, "output CRFH\\crfhFeatures");
+//
+                millis = System.currentTimeMillis();
+                seconds = (int) (millis / 1000) % 60;
+                minutes = (int) ((millis / (1000 * 60)) % 60);
+                hours = (int) ((millis / (1000 * 60 * 60)) % 24);
+
+                System.out.println(hours + ":" + minutes + ":" + seconds + " Finished CRFH feature extraction.");
+                
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                System.out.println(ex.toString());
+            }
+        }
+
+
+//            File dir = new File(imagesFolder);
+//            String[] children = dir.list();
+//
+//            if (children == null) {
+//
+//                img = null;
+//                img = ImageIO.read(dir);
+//                svm_node[] histogram = mycrfh.computeHistogram(img);
+//                //throw new Exception("The image folder and the labels file cannot be empty!");
+//            } else {
+//                for (int i = 0; i < children.length; i++) {
+//
+//                    String filename = children[i];
+//                    if (filename.endsWith("jpeg") || filename.endsWith("jpg")) {
+//
+//                        int imageconceptstart = filename.lastIndexOf("_") + 1;
+//                        int imageconceptend = filename.lastIndexOf(".");
+//
+//                        String concept = filename.substring(imageconceptstart, imageconceptend);
+//
+//                        img = null;
+//                        img = ImageIO.read(new File(imagesFolder + "\\" + filename));
+//
+////                        if (turnGreyscale) {
+////                           img = Image.getIntensitityChannelL(img);
+////                           //img = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+////                           //img.getRaster().setPixels(0, 0, img.getWidth(), img.getHeight(), input);
+//////                           Image.save(img, "Ldesc");
+////                        }
+//
+//                        svm_node[] histogram = mycrfh.computeHistogram(img);
+//
+//                        imageFeatures.add(new ImageFeature(histogram, Annotations.getAnnotation(concept)));
+//
+//                        // useful for unbalanced data
+//                      //  distribution[Annotations.getAnnotation(concept)]++;
+//
+//                        System.out.println("Processed image " + filename.substring(0, imageconceptend));
+//
+////                        if (i != 0 && i % 1000 == 0){
+////                            Serialization.serialize(imageFeatures, "output CRFH\\crfhFeatures"+i);
+////                        }
+//                    }
+//                }
+//            }
+//
+//            if (imageFeatures.isEmpty()) {
+//                throw new Exception("Unable to compute image features!");
+//            } else {
+//                
+////                int min = distribution[0];
+////                for (int i = 1; i < distribution.length; i++) {
+////                    if (distribution[i] < min) {
+////                        min = distribution[i];
+////                    }
+//                }
+//
+////                double[] weights = new double[distribution.length];
+////                for (int i = 0; i < distribution.length; i++) {
+////                    if (min != 0)
+////                        weights[i] = (double) (distribution[i] / min);
+////                }
+//
+//              //  Serialization.saveVectorToFile(weights, "output CRFH\\conceptWeights.txt");
+//
+//                Serialization.serialize(imageFeatures, "output CRFH\\crfhFeatures");
+//
+//            millis = System.currentTimeMillis();
+//            seconds = (int) (millis / 1000) % 60;
+//            minutes = (int) ((millis / (1000 * 60)) % 60);
+//            hours = (int) ((millis / (1000 * 60 * 60)) % 24);
+//
+//            System.out.println(hours + ":" + minutes + ":" + seconds + " Finished CRFH feature extraction.");
+
+    }
+
+    public void train() {
+
+        long millis = System.currentTimeMillis();
+        int seconds = (int) (millis / 1000) % 60;
+        int minutes = (int) ((millis / (1000 * 60)) % 60);
+        int hours = (int) ((millis / (1000 * 60 * 60)) % 24);
+
+        System.out.println(hours + ":" + minutes + ":" + seconds + " Started SVM trainig.");
+
+        try {
+
+            System.out.println("Deserializing features...");
+            ArrayList<ImageFeature> imageFeatures = (ArrayList<ImageFeature>) Serialization.deserialize("output CRFH\\crfhFeatures");
+            System.out.println("Finished deserializing features.");
+            SvmTrain svmTrain = new SvmTrain(print);
+            svm_model myModel = svmTrain.train(imageFeatures, new HistogramDistanceKernel(), false);
+
+            Serialization.serialize(myModel, "output CRFH\\crfhModel");
+
+            millis = System.currentTimeMillis();
+            seconds = (int) (millis / 1000) % 60;
+            minutes = (int) ((millis / (1000 * 60)) % 60);
+            hours = (int) ((millis / (1000 * 60 * 60)) % 24);
+
+            System.out.println(hours + ":" + minutes + ":" + seconds + " Finished SVM trainig.");
+
+        } catch (SvmInvalidParameterException ex) {
+              ex.getStackTrace();
+            System.out.println(ex.toString());
+        } catch (IOException ex) {
+              ex.getStackTrace();
+            System.out.println(ex.toString());
+        } catch (Exception ex) {
+            ex.getStackTrace();
+            System.out.println(ex.toString());
+        }
+    }
+
+    public void loadModels() {
+
+        if (svmModel == null) {
+
+            try {
+                
+                System.out.println("Deserializing model...");
+                
+                svmModel = (svm_model) Serialization.deserialize("output CRFH\\crfhModel");
+                
+                System.out.println("Finished deserializing model.");
+
+                mycrfh = new CRFH(this.initializeDescriptors(1, 2, 4, 8, 14), 4, 14);
+
+            } catch (IOException ex) {
+                System.out.println(ex.toString());
+            } catch (ClassNotFoundException ex) {
+                System.out.println(ex.toString());
+            }
+
+        }
+    }
+
+    public int predictImage(ArrayList<ImageFeature> allImageFeatures, String labelsFile, BufferedImage img, int probability) {
+
+        try {
+
+            Annotations.loadAnnotations(labelsFile);
+
+            SvmScale svmScale = null; //(SvmScale)Serialization.deserialize("output CRFH\\scaleModel");
+
+            svm_node[] histogram = mycrfh.computeHistogram(img);
+
+            ImageFeature featuresImg = new ImageFeature(histogram);
+
+            SvmPrediction prediction = SvmPredict.predict(allImageFeatures, featuresImg, new HistogramDistanceKernel(), svmScale, svmModel, probability, print);
+
+            if (probability == 1) {
+
+                for (Entry<String, Double> entry : prediction.getSortedEstimates(Annotations.getStringLabels())) {
+//                    if (entry.getValue() < 0.4)
+//                        return -1;
+//                    else
+                        return Annotations.getAnnotation(entry.getKey());
+                }
+            } else if (probability == 0) {
+                return prediction.getPredicted();
+                // System.out.println("Predicted concept: " + Annotations.getAnnotation(prediction.getPredicted()));
+            }
+
+        } catch (IOException ex) {
+            System.out.println(ex.toString());
+        } catch (SvmInvalidOperationException ex) {
+            System.out.println(ex.toString());
+        }
+
+        return -1;
+
+    }
+
+    public void predict(String imagesFolder, String labelsFile, String predictFile, int probability) {
+
+        loadModels();
+        BufferedImage img = null;
+        DataOutputStream out = null;
+        
+        try {
+            FileOutputStream ostream = new FileOutputStream(predictFile);
+            out = new DataOutputStream(ostream);
+            final BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out));
+            
+            File dir = new File(imagesFolder);
+            String[] children = dir.list();
+            Annotations.loadAnnotations(labelsFile);
+            ArrayList<ImageFeature> imageFeatures = (ArrayList<ImageFeature>) Serialization.deserialize("output CRFH\\crfhFeatures");
+
+            if (children == null) {
+
+                img = null;
+                img = ImageIO.read(dir);
+
+                long millis1 = System.currentTimeMillis();
+
+                int p = predictImage(imageFeatures, labelsFile, img, probability);
+
+                long millis = System.currentTimeMillis() - millis1;
+                int seconds = (int) (millis / 1000) % 60;
+
+                if (p != -1) {
+                    
+                    wr.append(dir + ": " + Annotations.getAnnotation(p));
+                    wr.newLine();
+                    
+                    System.out.println("Predicted image " + dir + " => " + Annotations.getAnnotation(p) + " in " + seconds + " seconds.");
+                } else {
+                    System.out.println("Predicted image " + dir + " => " + "Unknown" + " in " + seconds + " seconds.");
+                    wr.append(dir + ": " + "Unknown");
+                    wr.newLine();
+                }
+
+                //throw new Exception("The image folder and the labels file cannot be empty!");
+            } else {
+                for (int i = 0; i < children.length; i++) {
+
+                    String filename = children[i];
+                    if (filename.endsWith("jpeg") || filename.endsWith("jpg")) {
+
+                        img = ImageIO.read(new File(imagesFolder + "\\" + filename));
+
+                        long millis1 = System.currentTimeMillis();
+
+                        int p = predictImage(imageFeatures, labelsFile, img, probability);
+
+                        long millis = System.currentTimeMillis() - millis1;
+                        int seconds = (int) (millis / 1000) % 60;
+
+//                        wr.append(filename + ": " + Annotations.getAnnotation(p));
+//                        wr.newLine();
+//                        
+//                        System.out.println("Predicted image " + filename + " => " + Annotations.getAnnotation(p) + " in " + seconds + " seconds.");
+
+                        if (p != -1) {
+                            wr.append(filename + ": " + Annotations.getAnnotation(p));
+                            wr.newLine();
+
+                            System.out.println("Predicted image " + filename + " => " + Annotations.getAnnotation(p) + " in " + seconds + " seconds.");
+                        } else {
+                            System.out.println("Predicted image " + filename + " => " + "Unknown" + " in " + seconds + " seconds.");
+                            wr.append(filename + ": " + "Unknown");
+                            wr.newLine();
+                        }
+
+                    }
+                } // for
+            } //else
+
+            wr.flush();
+
+        } catch (IOException ex) {
+            System.out.println(ex.toString());
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            System.out.println(ex.toString());
+            ex.printStackTrace();
+        } finally {
+            try {
+                out.close();
+            } catch (IOException ex) {
+                System.out.println(ex.getStackTrace().toString() + ex.toString());
+            }
+        }
+        // try
+    }
+}

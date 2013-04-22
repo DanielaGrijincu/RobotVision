@@ -1,0 +1,92 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Utils;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ *
+ * @author Danna
+ */
+public class Evaluation {
+    
+    public static HashMap<String, String> mapPredictedConcepts = new HashMap<String, String>();
+    public static HashMap<String, String> mapActualConcepts = new HashMap<String, String>();
+    
+    public static void evaluate(String predictedConceptsFile, String actualConceptsFile){
+        
+        DataInputStream in1 = null;
+        DataInputStream in2 = null;
+        
+        try {
+            
+            FileInputStream fstream1 = new FileInputStream(predictedConceptsFile);
+            FileInputStream fstream2 = new FileInputStream(actualConceptsFile);
+            
+            in1 = new DataInputStream(fstream1);
+            in2 = new DataInputStream(fstream2);
+
+            final BufferedReader readPredicted = new BufferedReader(new InputStreamReader(in1));
+            final BufferedReader readActual = new BufferedReader(new InputStreamReader(in2));
+
+            String strLine;
+            while ((strLine = readPredicted.readLine()) != null) {
+
+                String concept = strLine.substring(strLine.indexOf(':') + 2);
+                String filename = strLine.subSequence(0, strLine.indexOf(':')).toString();
+                
+                mapPredictedConcepts.put(filename, concept);
+                
+            }
+            
+            while ((strLine = readActual.readLine()) != null) {
+
+                String concept = strLine.substring(strLine.indexOf(':') + 2);
+                String filename = strLine.subSequence(0, strLine.indexOf(':')).toString();
+                
+                mapActualConcepts.put(filename, concept);
+            }
+            
+            int correct = 0;
+            int incorrect = 0;
+            int unknown = 0;
+            
+            for (Map.Entry<String, String> entry : mapPredictedConcepts.entrySet()){
+                if (mapActualConcepts.containsKey(entry.getKey()))
+                    if (entry.getValue().equals(mapActualConcepts.get(entry.getKey())) == true){
+                        correct++;
+                    }else
+                        if (entry.getValue().equals("Unknown")){
+                            unknown++;
+                        }else
+                            incorrect++;
+            }
+            
+            
+            
+            System.out.println("Correctly classified images: " + correct);
+            System.out.println("Incorrectly classified images: " + incorrect);
+            System.out.println("Unknown classified images: " + unknown);
+            System.out.println("Classification percent: " + (float)((float)correct / (float)(correct + incorrect + unknown)) * 100 + "%");
+            
+            
+            
+        } catch (IOException ex) {
+            System.out.println(ex.getStackTrace().toString() + ex.toString());
+        } catch (Exception ex) {
+            System.out.println(ex.getStackTrace().toString() + ex.toString());
+        } finally {
+            try {
+                in1.close();
+                in2.close();
+            } catch (IOException ex) {
+                System.out.println(ex.getStackTrace().toString() + ex.toString());
+            }
+        }
+    }
+    
+}
