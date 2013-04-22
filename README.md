@@ -12,8 +12,11 @@ Retrieval type: Visual
 Run Type: Automatic
 
 Other information (time for computation etc.):
+
 Types of rooms: Corridor, ElevatorArea, PrinterRoom, LoungeArea, ProfessorOffice, StudentOffice, VisioConference, TechnicalRoom and Toilet.
+
 Total number of training images : 3 sets, 7112 images with different lightning conditions.
+
 The SVM training took approx. 4 hours on a Intel Core 2 Solo CPU(1.4 GHz). 
 
 Additional resources used: The training sets available on the Robot Vision 2012 official page were used for SVM classification and matching.
