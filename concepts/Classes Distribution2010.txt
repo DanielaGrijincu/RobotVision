@@ -1,8 +1,0 @@
-0	Corridor	1601
-1	Kitchen		878
-2	MeetingRoom	809
-3	SmallOffice	982
-4	LargeOffice	1645
-5	PrinterArea	304
-6	RecycleArea	263
-7	Toilet		272

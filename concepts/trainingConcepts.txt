@@ -1,9 +1,0 @@
-0	Corridor
-1	ElevatorArea
-2	LoungeArea
-3	TechnicalRoom
-4	StudentOffice
-5	ProfessorOffice
-6	VisioConference
-7	PrinterRoom
-8	Toilet
