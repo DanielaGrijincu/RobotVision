@@ -1,0 +1,239 @@
+package SVM;
+
+/*
+ * To change this template, choose Tools | Templates and open the template in
+ * the editor.
+ */
+import Exceptions.SvmInvalidOperationException;
+import SIFT.Feature;
+import Utils.ImageFeature;
+import Kernels.MyKernel;
+import Kernels.NARFKernel;
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Vector;
+import libsvm.*;
+
+public class SvmPredict {
+
+    public static SvmPrediction predict(ArrayList<ImageFeature> allImageFeatures, ImageFeature imageFeatures, MyKernel kernel, SvmScale svmScale, svm_model model, int predict_probability, svm_print_interface printInterface) throws IOException, SvmInvalidOperationException {
+
+        if (predict_probability == 1) {
+            if (svm.svm_check_probability_model(model) == 0) {
+                throw new SvmInvalidOperationException("Model does not support probabiliy estimates\n");
+            }
+        } else {
+            if (svm.svm_check_probability_model(model) != 0) {
+                throw new SvmInvalidOperationException("Model supports probability estimates, but disabled in prediction.\n");
+            }
+        }
+
+        int svm_type = svm.svm_get_svm_type(model);
+        int nr_class = svm.svm_get_nr_class(model);
+
+        int[] labels = new int[nr_class];
+
+        double[] prob_estimates = null;
+
+        if (predict_probability == 1) {
+            if (svm_type == svm_parameter.EPSILON_SVR || svm_type == svm_parameter.NU_SVR) {
+                printInterface.print("Prob. model for test data: target value = predicted value + z,\nz: Laplace distribution e^(-|z|/sigma)/(2sigma),sigma=" + svm.svm_get_svr_probability(model) + "\n");
+            } else {
+                svm.svm_get_labels(model, labels);
+                prob_estimates = new double[nr_class];
+            }
+        }
+
+        //if (svmScale != null)
+        // imageFeatures = svmScale.imageFeatureScale(imageFeatures);
+
+        svm_node[] x;
+        
+        if (kernel != null) {
+            x = kernel.getPredictGramMatrixCRFH(allImageFeatures, imageFeatures).x[0];
+        } else {
+            x = imageFeatures.getFeature();
+        }
+
+
+        double v;
+        if (predict_probability == 1 && (svm_type == svm_parameter.C_SVC || svm_type == svm_parameter.NU_SVC)) {
+           
+            svm.svm_predict_probability(model, x, prob_estimates);
+            return new SvmPrediction(labels, prob_estimates);
+        
+        } else {
+        
+            v = svm.svm_predict(model, x);
+            return new SvmPrediction((int) v);
+        } 
+
+    }
+    
+    public static SvmPrediction predict(ArrayList<ArrayList<ImageFeature>> allImageFeatures, ArrayList<ImageFeature> imageFeatures, MyKernel kernel, SvmScale svmScale, svm_model model, int predict_probability, svm_print_interface printInterface) throws IOException, SvmInvalidOperationException {
+
+        if (predict_probability == 1) {
+            if (svm.svm_check_probability_model(model) == 0) {
+                throw new SvmInvalidOperationException("Model does not support probabiliy estimates\n");
+            }
+        } else {
+            if (svm.svm_check_probability_model(model) != 0) {
+                throw new SvmInvalidOperationException("Model supports probability estimates, but disabled in prediction.\n");
+            }
+        }
+
+        int svm_type = svm.svm_get_svm_type(model);
+        int nr_class = svm.svm_get_nr_class(model);
+
+        int[] labels = new int[nr_class];
+
+        double[] prob_estimates = null;
+
+        if (predict_probability == 1) {
+            if (svm_type == svm_parameter.EPSILON_SVR || svm_type == svm_parameter.NU_SVR) {
+                printInterface.print("Prob. model for test data: target value = predicted value + z,\nz: Laplace distribution e^(-|z|/sigma)/(2sigma),sigma=" + svm.svm_get_svr_probability(model) + "\n");
+            } else {
+                svm.svm_get_labels(model, labels);
+                prob_estimates = new double[nr_class];
+            }
+        }
+
+        //if (svmScale != null)
+        // imageFeatures = svmScale.imageFeatureScale(imageFeatures);
+
+        svm_node[] x = null;
+        
+        if (kernel != null) {
+            x = kernel.getPredictGramMatrixSIFT(allImageFeatures, imageFeatures).x[0];
+        }
+//        else {
+//            x = imageFeatures.g;
+//        }
+
+
+        double v;
+        if (predict_probability == 1 && (svm_type == svm_parameter.C_SVC || svm_type == svm_parameter.NU_SVC)) {
+           
+            svm.svm_predict_probability(model, x, prob_estimates);
+            return new SvmPrediction(labels, prob_estimates);
+        
+        } else {
+        
+            v = svm.svm_predict(model, x);
+            return new SvmPrediction((int) v);
+        } 
+    }
+    
+    public static SvmPrediction predict(HashMap<Vector<Feature>, Integer> allImageFeatures, Vector<Feature> imageFeatures, MyKernel kernel, SvmScale svmScale, svm_model model, int predict_probability, svm_print_interface printInterface) throws IOException, SvmInvalidOperationException {
+
+        if (predict_probability == 1) {
+            if (svm.svm_check_probability_model(model) == 0) {
+                throw new SvmInvalidOperationException("Model does not support probabiliy estimates\n");
+            }
+        } else {
+            if (svm.svm_check_probability_model(model) != 0) {
+                throw new SvmInvalidOperationException("Model supports probability estimates, but disabled in prediction.\n");
+            }
+        }
+
+        int svm_type = svm.svm_get_svm_type(model);
+        int nr_class = svm.svm_get_nr_class(model);
+
+        int[] labels = new int[nr_class];
+
+        double[] prob_estimates = null;
+
+        if (predict_probability == 1) {
+            if (svm_type == svm_parameter.EPSILON_SVR || svm_type == svm_parameter.NU_SVR) {
+                printInterface.print("Prob. model for test data: target value = predicted value + z,\nz: Laplace distribution e^(-|z|/sigma)/(2sigma),sigma=" + svm.svm_get_svr_probability(model) + "\n");
+            } else {
+                svm.svm_get_labels(model, labels);
+                prob_estimates = new double[nr_class];
+            }
+        }
+
+        //if (svmScale != null)
+        // imageFeatures = svmScale.imageFeatureScale(imageFeatures);
+
+        svm_node[] x = null;
+        
+        if (kernel != null) {
+            x = kernel.getPredictGramMatrixSIFT(allImageFeatures, imageFeatures).x[0];
+        }
+//        else {
+//            x = imageFeatures.g;
+//        }
+
+
+        double v;
+        if (predict_probability == 1 && (svm_type == svm_parameter.C_SVC || svm_type == svm_parameter.NU_SVC)) {
+           
+            svm.svm_predict_probability(model, x, prob_estimates);
+            return new SvmPrediction(labels, prob_estimates);
+        
+        } else {
+        
+            v = svm.svm_predict(model, x);
+            return new SvmPrediction((int) v);
+        } 
+    }
+    
+    
+    public static SvmPrediction predict(ArrayList<AbstractMap.SimpleImmutableEntry<String, Integer>> allFeatures, String imageToPredictFile, MyKernel kernel, SvmScale svmScale, svm_model model, int predict_probability, svm_print_interface printInterface) throws IOException, SvmInvalidOperationException {
+
+        
+        if (predict_probability == 1) {
+            if (svm.svm_check_probability_model(model) == 0) {
+                throw new SvmInvalidOperationException("Model does not support probabiliy estimates\n");
+            }
+        } else {
+            if (svm.svm_check_probability_model(model) != 0) {
+                throw new SvmInvalidOperationException("Model supports probability estimates, but disabled in prediction.\n");
+            }
+        }
+
+        int svm_type = svm.svm_get_svm_type(model);
+        int nr_class = svm.svm_get_nr_class(model);
+
+        int[] labels = new int[nr_class];
+
+        double[] prob_estimates = null;
+
+        if (predict_probability == 1) {
+            
+            if (svm_type == svm_parameter.EPSILON_SVR || svm_type == svm_parameter.NU_SVR) {
+                printInterface.print("Prob. model for test data: target value = predicted value + z,\nz: Laplace distribution e^(-|z|/sigma)/(2sigma),sigma=" + svm.svm_get_svr_probability(model) + "\n");
+            } else {
+                svm.svm_get_labels(model, labels);
+                prob_estimates = new double[nr_class];
+            }
+        }
+
+        //if (svmScale != null)
+        // imageFeatures = svmScale.imageFeatureScale(imageFeatures);
+
+                
+        svm_node[] x = null;
+        if (kernel != null) {
+            x = kernel.getPredictGramMatrixNARF(allFeatures, imageToPredictFile).x[0];
+        }
+//        else {
+//            x = imageFeatures.g;
+//        }
+
+
+        double v;
+        if (predict_probability == 1 && (svm_type == svm_parameter.C_SVC || svm_type == svm_parameter.NU_SVC)) {
+           
+            svm.svm_predict_probability(model, x, prob_estimates);
+            return new SvmPrediction(labels, prob_estimates);
+        
+        } else {
+        
+            v = svm.svm_predict(model, x);
+            return new SvmPrediction((int) v);
+        } 
+    }
+}

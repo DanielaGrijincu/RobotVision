@@ -1,0 +1,103 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package RobotVision;
+
+import NARF.NarfDescriptor;
+import SIFT.Feature;
+import SIFT.FloatArray2DSIFT;
+import SIFT.PointMatch;
+import SIFT.SIFT;
+import Utils.Evaluation;
+import Utils.Preprocessing;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Vector;
+import javax.imageio.ImageIO;
+
+/**
+ *
+ * @author Danna
+ */
+public class Main {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) throws IOException {
+  
+        NARFTest narf = new NARFTest();
+        narf.computeNARFFeatures("D:\\Dana\\FACULTATE\\LICENTA\\training1\\pcd_files", "D:\\Dana\\FACULTATE\\LICENTA\\training1\\narf_features");
+        
+        
+ //       NarfDescriptor.getDescriptor("D:\\Dana\\FACULTATE\\LICENTA\\training1\\pcd_files\\depth_1000.pcd", "D:\\Dana\\FACULTATE\\LICENTA\\training1\\narf_features\\depth_1000.txt");
+ //       NarfDescriptor.getDescriptor("D:\\Dana\\FACULTATE\\LICENTA\\training1\\pcd_files\\depth_1001.pcd", "D:\\Dana\\FACULTATE\\LICENTA\\training1\\narf_features\\depth_1001.txt");
+ 
+//        float val = NarfDescriptor.compareDescriptors("D:\\Dana\\FACULTATE\\LICENTA\\training1\\narf_features\\depth_1001.txt", "D:\\Dana\\FACULTATE\\LICENTA\\training1\\narf_features\\depth_1001.txt");
+//        System.out.println("distance calculated: " + val);
+//        
+        
+        //        Preprocessing.process("training1\\std_cam\\", "training1\\locations\\rgb.txt", "training1Images.txt", 0.08f);
+//         CRFHTest crfh = new CRFHTest();
+
+ //        Preprocessing.process("training1\\std_cam\\", "training1\\locations\\rgb.txt", "training1Images.txt", 0.08f);
+ //        CRFHTest crfh = new CRFHTest();
+//         crfh.computeCrfhFeatures("concepts\\conceptsTraining1.txt", "training1\\std_cam\\", "training1Images.txt"); //D:\\Dana\\FACULTATE\\LICENTA\\training\\"); //, true);
+//         crfh.train();
+//         crfh.predict("training1\\std_cam\\", "concepts\\conceptsTraining1.txt", "predictedtest.txt", 1);
+//         crfh.predict("D:\\Dana\\FACULTATE\\LICENTA\\training1\\std_cam\\", "concepts\\conceptsTraining1.txt", "predictedtest.txt", 1);
+           
+//         Evaluation.evaluate("predictedtestRun1.txt", "training1\\locations\\rgb.txt");
+        
+ //          SIFTTest sift = new SIFTTest();
+      //     sift.computeSiftFeatures("concepts\\conceptsTraining1.txt", "D:\\Dana\\FACULTATE\\LICENTA\\training1\\std_cam\\", "testSiftsigma.txt"); 
+ //          sift.train();
+//           sift.predict("testSift\\", "concepts\\conceptsTraining1.txt", "predictedSift.txt", 1);
+//            Evaluation.evaluate("predictedSift.txt", "training1\\locations\\rgb.txt");
+
+   //     SIFTTest sift = new SIFTTest();
+   //        sift.computeSiftFeatures("concepts\\conceptsTraining1.txt", "training1\\std_cam\\", "training1\\locations\\rgb.txt"); 
+ //          sift.train();
+ //          sift.predict("testSift\\", "concepts\\conceptsTraining1.txt", "predictedSift.txt", 1);
+          //  Evaluation.evaluate("predictedSift.txt", "training1\\locations\\rgb.txt");
+          
+//           Vector< Feature > fs1;
+//           Vector< Feature > fs2;
+//           
+//           BufferedImage img1 = ImageIO.read(new File("testSift\\rgb_139.jpg"));
+//           BufferedImage img2 = ImageIO.read(new File("testSift\\rgb_139.jpg"));
+//           
+//           fs1 = SIFT.getFeatures(img1);
+//           fs2 = SIFT.getFeatures(img2);
+//           
+//           Vector< PointMatch > candidates1 = SIFT.createMatches( fs1, fs2, 1.5f, null, Float.MAX_VALUE );
+//           Vector< PointMatch > candidates2 = SIFT.createMatches( fs2, fs1, 1.5f, null, Float.MAX_VALUE );
+//           
+//           double val1 = (double)candidates1.size() / (double)fs1.size(); 
+//           double val2 = (double)candidates2.size() / (double)fs2.size(); 
+//           
+//           double f = ( (double) 1 / (double) 2 ) * (val1 + val2);
+           
+//           Vector< Feature > fs1;
+//           Vector< Feature > fs2;
+//           
+//           BufferedImage img1 = ImageIO.read(new File("testSift\\rgb_139.jpg"));
+//           BufferedImage img2 = ImageIO.read(new File("testSift\\rgb_139.jpg"));
+//           
+//           fs1 = SIFT.getFeatures(img1);
+//           fs2 = SIFT.getFeatures(img2);
+//           
+//           Vector< PointMatch > candidates1 = SIFT.createMatches( fs1, fs2, 1.5f, null, Float.MAX_VALUE );
+//           Vector< PointMatch > candidates2 = SIFT.createMatches( fs2, fs1, 1.5f, null, Float.MAX_VALUE );
+//           
+//           double val1 = (double)candidates1.size() / (double)fs1.size(); 
+//           double val2 = (double)candidates2.size() / (double)fs2.size(); 
+//           
+//           double f = ( (double) 1 / (double) 2 ) * (val1 + val2);
+//           
+    }
+        }
+
+    
