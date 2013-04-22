@@ -1,0 +1,8 @@
+0	Corridor
+1	Kitchen
+2	MeetingRoom
+3	SmallOffice
+4	LargeOffice
+5	PrinterArea
+6	RecycleArea
+7	Toilet
